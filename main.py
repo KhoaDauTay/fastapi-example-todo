@@ -28,23 +28,73 @@ todos = [
         completed=True
     ),
     Todo(
-        name="Khoa 1",
+        name="Khoa1",
         completed=False
     ),
     Todo(
-        name="Khoa 2",
+        name="Khoa2",
         completed=False
     ),
     Todo(
-        name="Khoa 3",
+        name="Khoa3",
         completed=False
     )
 ]
 
 
-@app.get("/")
+@app.get("/todos")
 def root():
+    # Do something
     return {
         "title": "My Todo Khoa Tran Long Hao app",
         "todos": todos
+    }
+
+
+# Schema
+class TodoCreate(BaseModel):
+    name: str
+
+
+class TodoUpdate(BaseModel):
+    completed: bool
+
+
+@app.post("/todos")
+def create_todo(data: TodoCreate):
+    new_todo = Todo(
+        name=data.name,
+        completed=False
+    )
+    todos.append(new_todo)
+    return new_todo
+
+
+@app.put("/todos/{name}")
+def update_status_todo(
+        name: str,
+        data: TodoUpdate
+):
+    for todo in todos:
+        if todo.name == name:
+            todo.completed = data.completed
+            return todo
+
+    return {
+        "message": f"Not found todo with name {name}"
+    }
+
+
+@app.delete("/todos/{name}")
+def delete_todo(
+        name: str,
+):
+    for todo in todos:
+        if todo.name == name:
+            todos.remove(todo)
+            return {
+                "message": f"Delete successfully {name}"
+            }
+    return {
+        "message": f"Not found todo with name {name}"
     }

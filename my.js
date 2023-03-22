@@ -1,7 +1,7 @@
 
 var myTitle = document.getElementById("title-app");
 
-fetch("http://127.0.0.1:8000/", {
+fetch("http://127.0.0.1:8000/todos", {
   method: "GET", // or 'PUT'
   headers: {
     "Content-Type": "application/json",
@@ -24,5 +24,4 @@ fetch("http://127.0.0.1:8000/", {
   .catch((error) => {
     console.error("Error:", error);
   });
-
 
