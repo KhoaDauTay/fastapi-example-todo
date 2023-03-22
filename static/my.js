@@ -1,6 +1,3 @@
-
-var myTitle = document.getElementById("title-app");
-
 fetch("http://127.0.0.1:8000/todos", {
   method: "GET", // or 'PUT'
   headers: {
@@ -9,7 +6,6 @@ fetch("http://127.0.0.1:8000/todos", {
 })
   .then((response) => response.json())
   .then((data) => {
-    myTitle.innerText = data.title
     const todos = data.todos;
     const ul = document.getElementById('myUL');
     todos.forEach(todo => {

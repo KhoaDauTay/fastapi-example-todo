@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <title>FastAPI</title>
-    <link rel="stylesheet" href="css.css">
+    <link href="{{ url_for('static', path='/css.css') }}" rel="stylesheet">
 </head>
 <body>
 <div id="myDIV" class="header">
-  <h2 id="title-app">My To Do List</h2>
+  <h2 id="title-app">{{title}}</h2>
   <input type="text" id="myInput" placeholder="Title...">
   <span onclick="newElement()" class="addBtn">Add</span>
 </div>
 
 <ul id="myUL">
 </ul>
-<script src="my.js"></script>
-<script src="scripts.js"></script>
+<script src="{{ url_for('static', path='/my.js') }}" ></script>
+<script src="{{ url_for('static', path='/scripts.js') }}"></script>
+
 
 </body>
 </html>

@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from starlette.requests import Request
+from starlette.staticfiles import StaticFiles
+from starlette.templating import Jinja2Templates
 
 app = FastAPI()
 
@@ -15,6 +18,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
 
 
 class Todo(BaseModel):
@@ -42,8 +47,14 @@ todos = [
 ]
 
 
+@app.get("/")
+def root(request: Request):
+    # Do something
+    return templates.TemplateResponse("index.html", {"request": request, "title": "Khoa App todo"})
+
+
 @app.get("/todos")
-def root():
+def get_todos():
     # Do something
     return {
         "title": "My Todo Khoa Tran Long Hao app",

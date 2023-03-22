@@ -52,7 +52,7 @@ list.addEventListener('click', function (ev) {
 function newElement() {
     var li = document.createElement("li");
     var inputValue = document.getElementById("myInput").value;
-
+    inputValue = inputValue.slice(0, -1)
     fetch("http://127.0.0.1:8000/todos", {
         method: "POST", // or 'PUT'
         headers: {
