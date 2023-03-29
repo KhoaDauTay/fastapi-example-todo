@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Depends
-from sqlalchemy import Column, String, Boolean, Integer
+from sqlalchemy import Column, String, Boolean, Integer, DateTime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from starlette.middleware.cors import CORSMiddleware
@@ -37,6 +37,9 @@ class TodoModel(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String)
     completed = Column(Boolean)
+    day_completed = Column(DateTime)
+    user = Column(String(length=20))
+    user_name = Column(String(length=20))
 
 
 #
