@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from sqlalchemy import Column, String, Boolean, Integer
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
@@ -16,7 +16,17 @@ engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
 # SessionLocal is class of Session in DB
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)  # -> Type class
+
+
 # -> 1 tap hop cac step de connect den db va mo ra session
+
+def inject_session():
+    session = SessionLocal()
+    try:
+        yield session
+    finally:
+        session.close()
+
 
 Base = declarative_base()
 
@@ -56,28 +66,23 @@ def root(request: Request):
 
 
 @app.get("/todos")
-def get_todos():
-    session = SessionLocal()
+def get_todos(session=Depends(inject_session)):
     result = session.query(TodoModel).all()
-    session.close()
     return {
         "todos": result
     }
 
 
 @app.get("/todos/{name}")
-def get_todo(name: str):
-    session = SessionLocal()
+def get_todo(name: str, session=Depends(inject_session)):
     result = session.query(TodoModel).filter_by(name=name).first()
-    session.close()
     return {
         "todo": result
     }
 
 
 @app.post("/todos")
-def create_todo(data: TodoCreate):
-    session = SessionLocal()
+def create_todo(data: TodoCreate, session=Depends(inject_session)):
     new_todo = TodoModel(
         name=data.name,
         completed=False
@@ -85,22 +90,20 @@ def create_todo(data: TodoCreate):
     session.add(new_todo)
     session.commit()
     session.refresh(new_todo)
-    session.close()
     return new_todo
 
 
 @app.put("/todos/{name}")
 def update_status_todo(
         name: str,
-        data: TodoUpdate
+        data: TodoUpdate,
+        session=Depends(inject_session)
 ):
-    session = SessionLocal()
     result = session.query(TodoModel).filter_by(name=name).first()
     if result:
         result.completed = data.completed
         session.commit()
         session.refresh(result)
-        session.close()
         return {
             "todo": result
         }
@@ -113,13 +116,12 @@ def update_status_todo(
 @app.delete("/todos/{name}")
 def delete_todo(
         name: str,
+        session=Depends(inject_session)
 ):
-    session = SessionLocal()
-    result = session.query(TodoModel).filter_by(name=name).first() # -> object of TodoModel
+    result = session.query(TodoModel).filter_by(name=name).first()  # -> object of TodoModel
     if result:
         session.delete(result)
         session.commit()
-        session.close()
         return {
             "message": f"Deleted {name}"
         }
@@ -127,7 +129,6 @@ def delete_todo(
         return {
             "message": f"Not found todo with name {name}"
         }
-
 
 # @app.get("/todos-sqlraw")
 # def get_todos():
