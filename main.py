@@ -1,13 +1,13 @@
 from fastapi import FastAPI
+from sqlalchemy import Column, String, Boolean, Integer
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
-from sqlalchemy import Column, String, Boolean, Integer
 
-from schemas import Todo, TodoCreate
+from schemas import TodoCreate, TodoUpdate
 
 # DATABASE
 SQLALCHEMY_DATABASE_URL = "sqlite:///app.db"
@@ -15,7 +15,8 @@ SQLALCHEMY_DATABASE_URL = "sqlite:///app.db"
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
 # SessionLocal is class of Session in DB
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)  # -> Type class
+# -> 1 tap hop cac step de connect den db va mo ra session
 
 Base = declarative_base()
 
@@ -51,7 +52,7 @@ templates = Jinja2Templates(directory="templates")
 @app.get("/")
 def root(request: Request):
     # Do something
-    return templates.TemplateResponse("index.html", {"request": request, "title": "Khoa App todo"})
+    return templates.TemplateResponse("index.html", {"request": request, "title": "Todo in thu 3"})
 
 
 @app.get("/todos")
@@ -88,34 +89,44 @@ def create_todo(data: TodoCreate):
     return new_todo
 
 
-# @app.put("/todos/{name}")
-# def update_status_todo(
-#         name: str,
-#         data: TodoUpdate
-# ):
-#     for todo in todos:
-#         if todo.name == name:
-#             todo.completed = data.completed
-#             return todo
-#
-#     return {
-#         "message": f"Not found todo with name {name}"
-#     }
+@app.put("/todos/{name}")
+def update_status_todo(
+        name: str,
+        data: TodoUpdate
+):
+    session = SessionLocal()
+    result = session.query(TodoModel).filter_by(name=name).first()
+    if result:
+        result.completed = data.completed
+        session.commit()
+        session.refresh(result)
+        session.close()
+        return {
+            "todo": result
+        }
+    else:
+        return {
+            "message": f"Not found todo with name {name}"
+        }
 
 
-# @app.delete("/todos/{name}")
-# def delete_todo(
-#         name: str,
-# ):
-#     for todo in todos:
-#         if todo.name == name:
-#             todos.remove(todo)
-#             return {
-#                 "message": f"Delete successfully {name}"
-#             }
-#     return {
-#         "message": f"Not found todo with name {name}"
-#     }
+@app.delete("/todos/{name}")
+def delete_todo(
+        name: str,
+):
+    session = SessionLocal()
+    result = session.query(TodoModel).filter_by(name=name).first() # -> object of TodoModel
+    if result:
+        session.delete(result)
+        session.commit()
+        session.close()
+        return {
+            "message": f"Deleted {name}"
+        }
+    else:
+        return {
+            "message": f"Not found todo with name {name}"
+        }
 
 
 # @app.get("/todos-sqlraw")
